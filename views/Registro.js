@@ -48,7 +48,7 @@ const Registro = ({navigation, route}) => {
 
             const { id } = route.params.usuario;
             usuario.id = id;
-            const url = `http://10.0.2.2:8000/api/user/${id}`;
+            const url = `https://try-my-ride.herokuapp.com/api/user/${id}`;
             const token = obtenerToken()
             console.log(token)
 
@@ -68,7 +68,7 @@ const Registro = ({navigation, route}) => {
             // guardar el usuario en la API
             try {
                 
-                await axios.post('http://10.0.2.2:8000/api/register', usuario)
+                await axios.post('https://try-my-ride.herokuapp.com/api/register', usuario)
                             .then(function (response) {
                                 const user = {
                                     'id': response.data['user']['id'],

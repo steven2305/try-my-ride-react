@@ -26,7 +26,7 @@ const Login = ({navigation, route}) => {
 
         //login
         try {
-            await axios.post('http://10.0.2.2:8000/api/login', cliente)
+            await axios.post('https://try-my-ride.herokuapp.com/api/login', cliente)
                         .then(function (response) {
                             const user = {
                                 'id': response.data['user']['id'],

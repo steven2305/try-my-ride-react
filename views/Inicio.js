@@ -20,7 +20,7 @@ const Inicio = ({navigation}) => {
                 try {
                     guardarUserId(JSON.parse(await AsyncStorage.getItem('user')))
                     if (userId.id > 0) {
-                        const resultado = await axios.get(`http://10.0.2.2:8000/api/user/${userId.id}`, 
+                        const resultado = await axios.get(`https://try-my-ride.herokuapp.com/api/user/${userId.id}`, 
                         {
                             headers: {
                             'Authorization': 'Bearer '+userId.token
@@ -55,7 +55,7 @@ const Inicio = ({navigation}) => {
     }
 
     const eliminarContacto = async () => {
-        const url = `http://10.0.2.2:8000/api/logout`;
+        const url = `https://try-my-ride.herokuapp.com/api/logout`;
         // console.log(url);
         try {
             await axios.post(url,'',
