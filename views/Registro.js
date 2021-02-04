@@ -3,6 +3,8 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { TextInput, Headline, Button, Paragraph, Dialog, Portal } from 'react-native-paper';
 import globalStyles from '../styles/global';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const Registro = ({navigation, route}) => {
 
@@ -10,42 +12,55 @@ const Registro = ({navigation, route}) => {
 
     // campos formulario
     const [ nombre, guardarNombre] = useState('');
-    const [ correo, guardarCorreo] = useState('');
+    const [ email, guardarEmail] = useState('');
     const [ password, guardarPassword] = useState('');
     const [ alerta, guardarAlerta] = useState(false);
 
     // detectar si estamos editando o no
     useEffect(() => {
-        if(route.params.cliente) {
-            const { nombre, correo, password } = route.params.cliente;
+        console.log(route.params)
+        if(route.params.usuario) {
+            
+            const { name, email } = route.params.usuario;
 
-            guardarNombre(nombre);
-            guardarCorreo(correo);
-            guardarPassword(password);
+            guardarNombre(name);
+            guardarEmail(email);
         } 
     }, []);
 
-    // almacena el cliente en la BD
-    const guardarCliente = async () => {
+    // almacena el usuario en la BD
+    const guardarUsuario = async () => {
         // validar
-        if(nombre === '' || correo === '' || password === '' ) {
+        if(nombre === '' || email === '' || password === '' ) {
             guardarAlerta(true)
             return;
         }
     
-        // generar el cliente
-        const cliente = { nombre, password, correo };
+        // generar el usuario
+        const usuario = { 
+            'name': nombre, 
+            'password':password, 
+            'email':email 
+        };
         console.log(cliente);
 
-        // Si estamos editando o creando un nuevo cliente
-        if(route.params.cliente) {
+        // Si estamos editando o creando un nuevo usuario
+        if(route.params.usuario) {
 
-            const { id } = route.params.cliente;
-            cliente.id = id;
-            const url = `http://localhost:3000/clientes/${id}`;
+            const { id } = route.params.usuario;
+            usuario.id = id;
+            const url = `http://localhost:8000/api/user/${id}`;
+            const token = obtenerToken()
+            console.log(token)
 
             try {
-                await axios.put(url, cliente);
+                await axios.put(url, cliente,
+                {
+                    headers: {
+                        'Authorization': 'Bearer '+token['token']
+                    }
+                }
+                );
             } catch (error) {
                 console.log(error);
             }
@@ -53,26 +68,47 @@ const Registro = ({navigation, route}) => {
         } else {
             // guardar el cliente en la API
             try {
-                if(Platform.OS === 'ios') {
-                    await axios.post('http://localhost:3000/clientes', cliente)
-                } else {
-                    await axios.post('http://10.0.2.2:3000/clientes', cliente);
-                }
+                await axios.post('http://10.0.2.2:8000/api/register', cliente)
+                            .then(function (response) {
+                                const user = {
+                                    'id': response.data['user']['id'],
+                                    'token': response.data['token']
+                                }
+                                guardarUser(JSON.stringify(user))
+                              });
             } catch (error) {
                 console.log(error);
             }
         }
+        
 
         // redireccionar
         navigation.navigate('Inicio');
 
         // limpiar el form (opcional)
         guardarNombre('');
-        guardarCorreo('');
+        guardarEmail('');
         guardarPassword('');
 
         // cambiar a true para traernos el nuevo cliente
         guardarConsultarAPI(true);
+    }
+
+    const guardarUser = async (user) => {
+        try {
+            await AsyncStorage.setItem('user', user)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const obtenerToken = async () => {
+        try {
+            token = JSON.parse(await AsyncStorage.getItem('user'))
+            return token
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return ( 
@@ -81,29 +117,38 @@ const Registro = ({navigation, route}) => {
             <Headline style={globalStyles.titulo}>Añadir Usuario</Headline>
 
             <TextInput
-                label="Nombre"
+                label="nombre"
                 placeholder="Juan"
                 onChangeText={ texto => guardarNombre(texto) }
                 value={nombre}
                 style={styles.input}
             />
             <TextInput
-                label="Correo"
-                placeholder="correo@correo.com"
-                onChangeText={ texto => guardarCorreo(texto) }
-                value={correo}
+                label="email"
+                placeholder="email@email.com"
+                onChangeText={ texto => guardarEmail(texto) }
+                value={email}
                 style={styles.input}
             />
-            <TextInput
-                label="Password"
-                placeholder="password"
-                onChangeText={ texto => guardarPassword(texto) }
-                value={password}
-                style={styles.input}
-            />
+            {  !route.params.usuario ?
+                <View>
+                    <TextInput
+                        label="Password"
+                        placeholder="password"
+                        secureTextEntry={true}
+                        onChangeText={ texto => guardarPassword(texto) }
+                        value={password}
+                        style={styles.input}
+                    />
+                </View>
+                :
+                <View>
+                </View>    
+            }
+            
 
-            <Button icon="pencil-circle" mode="contained" onPress={() => guardarCliente() }>
-                Guardar Cliente
+            <Button icon="pencil-circle" mode="contained" onPress={() => guardarUsuario() }>
+                Guardar Usuario
             </Button>
 
             <Portal>

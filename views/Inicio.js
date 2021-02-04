@@ -1,57 +1,66 @@
 import React, { useEffect, useState } from 'react';
 import { Text, FlatList, View } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { List, Headline, Button, FAB } from 'react-native-paper';
 import globalStyles from '../styles/global'
 
 const Inicio = ({navigation}) => {
 
     // state de la app
-    const [ clientes, guardarClientes ] = useState([]);
+    const [ userId, guardarUserId ] = useState([]);
+    const [ usuario, guardarUser ] = useState([]);
     const [ consultarAPI, guardarConsultarAPI ] = useState(true);
+    
 
-    useEffect(() => {
-        const obtenerClientesApi = async () => {
+     useEffect(() => {
+        const ObtenerUser = async () => {
             try {
-                const resultado = await axios.get('http://localhost:3000/clientes');
-                guardarClientes(resultado.data)
-                guardarConsultarAPI(false);
+                guardarUserId(JSON.parse(await AsyncStorage.getItem('user')))
+                if (userId.id > 0) {
+                    const resultado = await axios.get(`http://10.0.2.2:8000/api/user/${userId.id}`, 
+                    {
+                        headers: {
+                          'Authorization': 'Bearer '+userId.token
+                        }
+                    }
+                    );
+                    guardarUser(resultado.data['user'])
+                    
+                    guardarConsultarAPI(false);
+                }
             } catch (error) {
                 console.log(error);
             }
         }
 
         if(consultarAPI) {
-            obtenerClientesApi();
+            ObtenerUser();
             
         }
     }, [consultarAPI]);
-
+ 
 
     return ( 
         <View style={globalStyles.contenedor}>
 
-            <Button style={globalStyles.btnContenedor} icon="plus-circle" mode="contained" onPress={() => navigation.navigate("Login", { guardarConsultarAPI }) }>
-                Login
-            </Button>
+                { usuario.length > 0 ?
+                    <View>
+                        <Button style={globalStyles.btnContenedor} icon="plus-circle" mode="contained" onPress={() => navigation.navigate("Login", { guardarConsultarAPI }) }>
+                            Login
+                        </Button>
+                    </View>
+                    :
+                    <View>
+                    </View>    
+                }
+                
 
-            <Button style={globalStyles.btnContenedor} icon="plus-circle" mode="contained" onPress={() => navigation.navigate("Registro", { guardarConsultarAPI }) }>
-                Registro
-            </Button>
+                <Button style={globalStyles.btnContenedor} icon="plus-circle" mode="contained" onPress={() => navigation.navigate("Registro", { usuario, guardarConsultarAPI }) }>
+                { usuario.length > 0 ? "Registro" : "Editar perfil" }
+                </Button>
 
-            <Headline style={globalStyles.titulo}> { clientes.length > 0 ? "Clientes" : "Aún no has iniciado sesion" } </Headline>
-
-            <FlatList
-                data={clientes}
-                keyExtractor={ cliente => (cliente.id).toString()  }
-                renderItem={ ({item}) => (
-                    <List.Item
-                        title={item.nombre}
-                        description={item.empresa}
-                        onPress={ () => navigation.navigate("DetallesCliente", { item, guardarConsultarAPI }) }
-                    />
-                )}
-            />
+            <Headline style={globalStyles.titulo}> { usuario.length > 0 ? "Aun no has iniciado sesion" : "Bienvenido" } </Headline>
 
         </View>
      );

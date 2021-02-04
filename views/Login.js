@@ -26,7 +26,7 @@ const Registro = ({navigation, route}) => {
     // almacena el cliente en la BD
     const guardarCliente = async () => {
         // validar
-        if(correo === '' || password === '' ) {
+        if(correo === '' || password === '') {
             guardarAlerta(true)
             return;
         }
