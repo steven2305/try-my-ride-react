@@ -7,7 +7,6 @@ import {
 import Inicio from './views/Inicio';
 import Registro from './views/Registro';
 import Login from './views/Login';
-import DetallesCliente from './views/DetallesCliente';
 
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
@@ -59,13 +58,6 @@ const App  = () => {
                   component={Login}
                   options={{
                     title: "Ingreso"
-                  }}
-                />
-                <Stack.Screen
-                  name="DetallesCliente"
-                  component={DetallesCliente}
-                  options={{
-                    title: "Detalles Cliente"
                   }}
                 />
             </Stack.Navigator>
