@@ -10,6 +10,12 @@ const globalStyles = StyleSheet.create({
         padding: 5,
         margin: 10
     },
+    btnContenedorDelete: {
+        padding: 5,
+        margin: 10,
+        color: 'red',
+        backgroundColor: 'red'
+    },
     titulo: {
         textAlign: 'center',
         marginTop: 20,

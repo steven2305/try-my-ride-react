@@ -42,19 +42,18 @@ const Registro = ({navigation, route}) => {
             'password':password, 
             'email':email 
         };
-        console.log(cliente);
 
         // Si estamos editando o creando un nuevo usuario
         if(route.params.usuario) {
 
             const { id } = route.params.usuario;
             usuario.id = id;
-            const url = `http://localhost:8000/api/user/${id}`;
+            const url = `http://10.0.2.2:8000/api/user/${id}`;
             const token = obtenerToken()
             console.log(token)
 
             try {
-                await axios.put(url, cliente,
+                await axios.put(url, usuario,
                 {
                     headers: {
                         'Authorization': 'Bearer '+token['token']
@@ -66,9 +65,10 @@ const Registro = ({navigation, route}) => {
             }
 
         } else {
-            // guardar el cliente en la API
+            // guardar el usuario en la API
             try {
-                await axios.post('http://10.0.2.2:8000/api/register', cliente)
+                
+                await axios.post('http://10.0.2.2:8000/api/register', usuario)
                             .then(function (response) {
                                 const user = {
                                     'id': response.data['user']['id'],
@@ -90,13 +90,14 @@ const Registro = ({navigation, route}) => {
         guardarEmail('');
         guardarPassword('');
 
-        // cambiar a true para traernos el nuevo cliente
+        // cambiar a true para traernos el nuevo usuario
         guardarConsultarAPI(true);
     }
 
     const guardarUser = async (user) => {
         try {
             await AsyncStorage.setItem('user', user)
+            console.log(await AsyncStorage.getItem('user'));
         } catch (error) {
             console.log(error);
         }
@@ -130,20 +131,20 @@ const Registro = ({navigation, route}) => {
                 value={email}
                 style={styles.input}
             />
-            {  !route.params.usuario ?
+            {  route.params.usuario ?
                 <View>
-                    <TextInput
-                        label="Password"
-                        placeholder="password"
-                        secureTextEntry={true}
-                        onChangeText={ texto => guardarPassword(texto) }
-                        value={password}
-                        style={styles.input}
-                    />
-                </View>
+                </View> 
                 :
                 <View>
-                </View>    
+                <TextInput
+                    label="Password"
+                    placeholder="password"
+                    secureTextEntry={true}
+                    onChangeText={ texto => guardarPassword(texto) }
+                    value={password}
+                    style={styles.input}
+                />
+            </View>   
             }
             
 
